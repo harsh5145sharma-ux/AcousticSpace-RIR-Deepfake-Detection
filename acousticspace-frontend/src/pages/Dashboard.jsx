@@ -1,19 +1,34 @@
+import { useState } from "react";
 import Navbar from "../components/Navbar";
-import {useState} from "react";
 import AudioUpload from "../components/AudioUpload";
 import ResultCard from "../components/ResultCard";
 
+
 function Dashboard() {
-  const [selectedFile,setSelectedFile]=useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [status, setStatus] = useState("Not Tested");
+  const [confidence, setConfidence] = useState(0);
+
+  const handleDetection = () => {
+    setStatus("Processing...");
+
+    setTimeout(() => {
+      setStatus("Real");
+      setConfidence(95);
+    }, 2000);
+  };
+
   return (
     <>
       <Navbar />
 
       <div
         style={{
-          backgroundColor: "#F5F7FA",
+          backgroundColor: "#F8FAFC",
           minHeight: "100vh",
-          padding: "40px",
+          width: "100%",
+          boxSizing: "border-box",
+          padding: "20px",
         }}
       >
         <div
@@ -21,6 +36,8 @@ function Dashboard() {
             backgroundColor: "#ffffff",
             borderRadius: "18px",
             padding: "35px",
+            maxWidth: "1200px",
+            margin: "0 auto",
             boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
           }}
         >
@@ -45,35 +62,38 @@ function Dashboard() {
           <div
             style={{
               display: "flex",
-              gap: "40px",
-              flexWrap: "wrap",
+              justifyContent: "space-between",
               alignItems: "flex-start",
+              gap: "30px",
+              flexWrap: "wrap",
             }}
           >
             {/* Left Side */}
+
             <div
               style={{
-                flex: "1",
+                flex: 1,
                 minWidth: "350px",
               }}
             >
-              <AudioUpload />
+              <AudioUpload 
+                   onUpload={handleDetection}
+                   selectedFile={selectedFile}
+                   setSelectedFile={setSelectedFile}
+                 />
 
-              <div
-                style={{
-                  marginTop: "30px",
-                  backgroundColor: "#F9FAFB",
-                  padding: "20px",
-                  borderRadius: "12px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                }}
-              >
-                <h2 style={{ color: "#2563EB" }}>
+              <div style={{ marginTop: "25px" }}>
+                <h2
+                  style={{
+                    color: "#2563EB",
+                  }}
+                >
                   Audio Information
                 </h2>
 
                 <p>
-                  <b>File Name:</b> Not Selected
+                    <strong>File Name:</strong>{" "}
+                      {selectedFile ? selectedFile.name : "Not Selected"}
                 </p>
 
                 <p>
@@ -81,20 +101,37 @@ function Dashboard() {
                 </p>
 
                 <p>
-                  <b>File Size:</b> 0 KB
+                   <strong>File Size:</strong>{" "}
+                     {selectedFile
+                     ? (selectedFile.size / 1024).toFixed(2) + " KB"
+                      : "0 KB"}
                 </p>
               </div>
             </div>
 
             {/* Right Side */}
+
             <div
               style={{
-                flex: "1",
+                flex: 1,
                 minWidth: "320px",
               }}
             >
-              <ResultCard />
+              <ResultCard
+                status={status}
+                confidence={confidence}
+              />
             </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: "50px",
+              textAlign: "center",
+              color: "#9CA3AF",
+            }}
+          >
+            AcousticSpace © 2026
           </div>
         </div>
       </div>
