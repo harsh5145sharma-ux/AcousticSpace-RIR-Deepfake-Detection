@@ -1,5 +1,8 @@
+import { useRef } from "react";
 
 function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
+
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -20,6 +23,8 @@ function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
     if (onUpload) {
       onUpload();
     }
+
+    
   };
 
   return (
@@ -35,10 +40,28 @@ function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
 
       <p>Select a WAV or MP3 file for AI analysis.</p>
 
+      <label
+        htmlFor="audioFile"
+        style={{
+          backgroundColor: "#2563EB",
+          color: "white",
+          padding: "12px 20px",
+          borderRadius: "8px",
+          cursor: "pointer",
+          display: "inline-block",
+          marginBottom: "15px",
+        }}
+      >
+        📁 Choose Audio File
+      </label>
+
       <input
+        ref={fileInputRef}
+        id="audioFile"
         type="file"
         accept=".wav,.mp3"
         onChange={handleFileChange}
+        style={{ display: "none" }}
       />
 
       <br />
@@ -68,8 +91,7 @@ function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
           <p><b>Name:</b> {selectedFile.name}</p>
 
           <p>
-            <b>Size:</b>{" "}
-            {(selectedFile.size / 1024).toFixed(2)} KB
+            <b>Size:</b> {(selectedFile.size / 1024).toFixed(2)} KB
           </p>
 
           <p>

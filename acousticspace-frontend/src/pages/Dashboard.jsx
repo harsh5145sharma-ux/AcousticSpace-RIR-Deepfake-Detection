@@ -2,21 +2,23 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 import AudioUpload from "../components/AudioUpload";
 import ResultCard from "../components/ResultCard";
-
+import WaveformViewer from "../components/WaveformViewer";
+import mockResult from "../data/mockResult";
 
 function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("Not Tested");
   const [confidence, setConfidence] = useState(0);
 
-  const handleDetection = () => {
-    setStatus("Processing...");
+const handleDetection = () => {
+  setStatus("Processing...");
+  setConfidence(0);
 
-    setTimeout(() => {
-      setStatus("Real");
-      setConfidence(95);
-    }, 2000);
-  };
+  setTimeout(() => {
+    setStatus(mockResult.is_fake ? "Fake" : "Real");
+    setConfidence(mockResult.confidence);
+  }, 2000);
+};
 
   return (
     <>
@@ -74,6 +76,9 @@ function Dashboard() {
               style={{
                 flex: 1,
                 minWidth: "350px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
               }}
             >
               <AudioUpload 
@@ -107,6 +112,9 @@ function Dashboard() {
                       : "0 KB"}
                 </p>
               </div>
+              <WaveformViewer 
+                selectedFile={selectedFile}
+                result={mockResult} />
             </div>
 
             {/* Right Side */}
