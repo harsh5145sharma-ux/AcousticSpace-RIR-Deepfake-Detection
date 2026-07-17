@@ -1,0 +1,13 @@
+{
+    "total_samples": 200,
+    "class_distribution": {
+        "human": 100,
+        "ai": 100
+    },
+    "split_distribution": {
+        "train": 140,
+        "val": 30,
+        "test": 30
+    },
+    "average_duration": 3.3469199999999995
+}
