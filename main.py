@@ -1,25 +1,22 @@
+import logging
 from src.utils import audio_to_spectrogram
 from src.data_loader import get_audio_paths
-from models.inference import predict  # Import the mock inference
+from models.inference import predict
 import os
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
 def run_batch_processing(csv_file):
-    print(f"Loading data from {csv_file}...")
     paths = get_audio_paths(csv_file)
+    logging.info(f"Starting batch for {len(paths)} files.")
     
     for path in paths:
-        if os.path.exists(path):
-            print(f"Processing: {path}")
-            # 1. Get features
+        try:
             spec = audio_to_spectrogram(path)
-            
-            # 2. Get prediction from mock model
             result = predict(spec)
-            
-            # 3. Output the result
-            print(f"Result for {os.path.basename(path)}: {result}")
-        else:
-            print(f"Warning: File not found at {path}")
+            logging.info(f"Successfully processed {os.path.basename(path)}: {result}")
+        except Exception as e:
+            logging.error(f"Failed to process {path}: {e}")
 
 if __name__ == "__main__":
     run_batch_processing("metadata.csv")
