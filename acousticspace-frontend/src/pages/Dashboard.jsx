@@ -4,144 +4,208 @@ import AudioUpload from "../components/AudioUpload";
 import ResultCard from "../components/ResultCard";
 import WaveformViewer from "../components/WaveformViewer";
 import mockResult from "../data/mockResult";
+import "../styles/Dashboard.css";
 
 function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("Not Tested");
   const [confidence, setConfidence] = useState(0);
+  const [detectionTime, setDetectionTime] = useState("-");
+  const [duration, setDuration] = useState("--:--");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [result, setResult] = useState(null);
+  const [message, setMessage] = useState("");
+  
 
-const handleDetection = () => {
-  setStatus("Processing...");
-  setConfidence(0);
+  const handleDetection = () => {
+    setStatus("Processing...");
+    setConfidence(0);
+    setResult(null);
+    setIsProcessing(true);
+    setMessage("Audio uploaded successfully!");
 
-  setTimeout(() => {
-    setStatus(mockResult.is_fake ? "Fake" : "Real");
-    setConfidence(mockResult.confidence);
-  }, 2000);
-};
+    setTimeout(() => {
+      setResult(mockResult);
+      setStatus(mockResult.is_fake ? "Fake" : "Real");
+      setConfidence(mockResult.confidence);
+      setDetectionTime(new Date().toLocaleString());
+      setIsProcessing(false);
+      setMessage("Detection Completed Successfully!");
+    }, 2000);
+  };
 
   return (
     <>
       <Navbar />
 
-      <div
-        style={{
-          backgroundColor: "#F8FAFC",
-          minHeight: "100vh",
-          width: "100%",
-          boxSizing: "border-box",
-          padding: "20px",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "18px",
-            padding: "35px",
-            maxWidth: "1200px",
-            margin: "0 auto",
-            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-          }}
-        >
-          <h1
-            style={{
-              marginBottom: "10px",
-              color: "#1F2937",
-            }}
-          >
+      <div className="dashboard-container">
+
+        <div className="dashboard-card">
+
+          <h1 className="dashboard-title">
             AcousticSpace Dashboard
           </h1>
 
-          <p
-            style={{
-              color: "#6B7280",
-              marginBottom: "35px",
-            }}
-          >
+          <p className="dashboard-subtitle">
             Welcome to the Audio Deepfake Detection System
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: "30px",
-              flexWrap: "wrap",
-            }}
-          >
-            {/* Left Side */}
+           {message && (
+            <div className="success-message">
+              ✅ {message}
+            </div>
+          )}
 
-            <div
-              style={{
-                flex: 1,
-                minWidth: "350px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-              }}
-            >
-              <AudioUpload 
-                   onUpload={handleDetection}
-                   selectedFile={selectedFile}
-                   setSelectedFile={setSelectedFile}
-                 />
+          {/* Summary Cards */}
 
-              <div style={{ marginTop: "25px" }}>
-                <h2
-                  style={{
-                    color: "#2563EB",
-                  }}
-                >
+          <div className="summary-cards">
+
+            <div className="summary-card summary-blue">
+              <h3 className="summary-title-blue">
+                📁 Selected File
+              </h3>
+
+              <p>
+                {selectedFile ? selectedFile.name : "No File Selected"}
+              </p>
+            </div>
+
+            <div className="summary-card summary-green">
+              <h3 className="summary-title-green">
+                🎯 Status
+              </h3>
+
+              <p>{status}</p>
+            </div>
+
+            <div className="summary-card summary-yellow">
+              <h3 className="summary-title-yellow">
+                📊 Confidence
+              </h3>
+
+              <p>
+                {status === "Not Tested"
+                  ? "-"
+                  : `${confidence}%`}
+              </p>
+            </div>
+
+          </div>
+
+          {/* Main Layout */}
+
+          <div className="dashboard-content">
+
+            {/* Left Panel */}
+
+            <div className="left-panel">
+
+              <AudioUpload
+                selectedFile={selectedFile}
+                setSelectedFile={setSelectedFile}
+                setDuration={setDuration}
+                onUpload={handleDetection}
+              />
+
+              <div className="audio-info">
+
+                <h2 className="audio-info-title">
                   Audio Information
                 </h2>
 
                 <p>
-                    <strong>File Name:</strong>{" "}
-                      {selectedFile ? selectedFile.name : "Not Selected"}
+                  <strong>File Name:</strong>{" "}
+                  {selectedFile
+                    ? selectedFile.name
+                    : "Not Selected"}
                 </p>
 
                 <p>
-                  <b>Duration:</b> --:--
+                  <strong>Duration:</strong> {duration}
                 </p>
 
                 <p>
-                   <strong>File Size:</strong>{" "}
-                     {selectedFile
-                     ? (selectedFile.size / 1024).toFixed(2) + " KB"
-                      : "0 KB"}
+                  <strong>File Type:</strong>{" "}
+                  {selectedFile
+                    ? selectedFile.type
+                    : "Not Available"}
                 </p>
+
+                <p>
+                  <strong>File Size:</strong>{" "}
+                  {selectedFile
+                    ? `${(selectedFile.size / 1024).toFixed(2)} KB`
+                    : "0 KB"}
+                </p>
+
               </div>
-              <WaveformViewer 
+
+              <WaveformViewer
                 selectedFile={selectedFile}
-                result={mockResult} />
+                result={result}
+              />
+
             </div>
 
-            {/* Right Side */}
+            {/* Right Panel */}
 
-            <div
-              style={{
-                flex: 1,
-                minWidth: "320px",
-              }}
-            >
+            <div className="right-panel">
+
+              {isProcessing && (
+
+                <div className="processing-box">
+
+                  <h3 className="processing-title">
+                    Processing Audio...
+                  </h3>
+
+                  <h3 className="processing-title">
+                    ⏳ Processing Audio...
+                 </h3>
+
+                  <progress
+                    className="processing-progress"
+                  />
+
+                </div>
+
+              )}
+
               <ResultCard
                 status={status}
                 confidence={confidence}
+                selectedFile={selectedFile}
+                detectionTime={detectionTime}
               />
+
             </div>
+
           </div>
 
-          <div
-            style={{
-              marginTop: "50px",
-              textAlign: "center",
-              color: "#9CA3AF",
-            }}
-          >
-            AcousticSpace © 2026
+          {/* Footer */}
+
+          <div className="footer">
+
+          <h3 className="footer-title">
+           🎧 AcousticSpace
+          </h3>
+
+           <p>
+           AI Powered Audio Deepfake Detection System
+           </p>
+
+           <p>
+             Frontend Module • Member 4
+           </p>
+
+           <p>
+            © 2026 AcousticSpace Team
+          </p>
+
           </div>
+
         </div>
+
       </div>
     </>
   );

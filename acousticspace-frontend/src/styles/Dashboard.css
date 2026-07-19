@@ -1,0 +1,269 @@
+/* ===========================
+   Dashboard Container
+=========================== */
+
+.dashboard-container {
+  background: #f8fafc;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.dashboard-card {
+  background: #ffffff;
+  max-width: 1400px;
+  width: 100%;
+  margin: auto;
+  padding: 35px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  box-sizing: border-box;
+}
+
+/* ===========================
+   Heading
+=========================== */
+
+.dashboard-title {
+  text-align: center;
+  font-size: 38px;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.dashboard-subtitle {
+  text-align: center;
+  color: #6b7280;
+  font-size: 17px;
+  margin-bottom: 35px;
+}
+
+/* ===========================
+   Summary Cards
+=========================== */
+
+.summary-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 35px;
+}
+
+.summary-card {
+  flex: 1;
+  padding: 22px;
+  border-radius: 15px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+}
+
+.summary-blue {
+  background: #eff6ff;
+}
+
+.summary-green {
+  background: #f0fdf4;
+}
+
+.summary-yellow {
+  background: #fef3c7;
+}
+
+.summary-title-blue {
+  color: #2563EB;
+}
+
+.summary-title-green {
+  color: #16A34A;
+}
+
+.summary-title-yellow {
+  color: #D97706;
+}
+
+/* ===========================
+   Main Layout
+=========================== */
+
+.dashboard-content {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.left-panel {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.right-panel {
+  flex: 1;
+  min-width: 340px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ===========================
+   Audio Information
+=========================== */
+
+.audio-info {
+  background: white;
+  padding: 22px;
+  border-radius: 15px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.audio-info-title {
+  color: #2563EB;
+  margin-bottom: 15px;
+}
+
+.audio-info p {
+  margin: 10px 0;
+  color: #374151;
+}
+
+/* ===========================
+   Processing Box
+=========================== */
+
+.processing-box {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.processing-title {
+  color: #2563EB;
+  margin-bottom: 15px;
+}
+
+.processing-progress {
+  width: 100%;
+  height: 18px;
+}
+
+/* ===========================
+   Footer
+=========================== */
+
+.footer {
+  margin-top: 50px;
+  text-align: center;
+  border-top: 1px solid #E5E7EB;
+  padding-top: 25px;
+  color: #6B7280;
+}
+
+.footer-title {
+  color: #2563EB;
+  margin-bottom: 10px;
+}
+
+/* ===========================
+   Responsive (Tablet)
+=========================== */
+
+@media (max-width: 1024px) {
+
+  .dashboard-content {
+    flex-direction: column;
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .summary-cards {
+    flex-wrap: wrap;
+  }
+
+  .summary-card {
+    flex: 1 1 calc(50% - 20px);
+  }
+
+}
+
+/* ===========================
+   Responsive (Mobile)
+=========================== */
+
+@media (max-width:768px){
+
+.dashboard-container{
+padding:15px;
+}
+
+.dashboard-card{
+padding:20px;
+}
+
+.dashboard-title{
+font-size:30px;
+}
+
+.dashboard-subtitle{
+font-size:15px;
+}
+
+.summary-cards{
+flex-direction:column;
+}
+
+.summary-card{
+width:100%;
+}
+
+.dashboard-content{
+flex-direction:column;
+gap:20px;
+}
+
+.left-panel,
+.right-panel{
+width:100%;
+max-width:100%;
+min-width:100%;
+}
+
+.audio-info{
+padding:18px;
+}
+
+.footer{
+font-size:14px;
+}
+
+}
+
+.success-message{
+    background:#DCFCE7;
+    color:#166534;
+    padding:12px;
+    border-radius:10px;
+    margin:20px auto;
+    max-width:500px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.processing-box{
+text-align:center;
+}
+
+.processing-progress{
+margin-top:15px;
+}

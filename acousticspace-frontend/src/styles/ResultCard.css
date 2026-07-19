@@ -1,0 +1,119 @@
+.result-card {
+  width: 100%;
+  background: #fff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+  box-sizing: border-box;
+  transition: 0.3s;
+}
+
+.result-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+
+.result-title {
+  color: #2563EB;
+  margin-bottom: 20px;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.status-badge {
+  display: inline-block;
+  color: white;
+  padding: 8px 22px;
+  border-radius: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.confidence-circle {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 8px solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  font-size: 28px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.confidence-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 15px;
+  color: #374151;
+}
+
+.confidence-progress {
+  width: 100%;
+  height: 18px;
+  margin-top: 15px;
+}
+
+.detection-time {
+  margin-top: 15px;
+  color: #6B7280;
+  font-size: 14px;
+}
+
+.analysis-message {
+  margin-top: 10px;
+  color: #6B7280;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.download-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #2563EB;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: #1D4ED8;
+}
+
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+
+  .result-card {
+    padding: 20px;
+  }
+
+  .result-title {
+    font-size: 24px;
+  }
+
+  .confidence-circle {
+    width: 110px;
+    height: 110px;
+    font-size: 24px;
+  }
+
+}
+
+.result-description{
+color:#6B7280;
+margin-top:-10px;
+margin-bottom:15px;
+}

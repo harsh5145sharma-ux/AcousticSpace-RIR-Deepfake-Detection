@@ -1,4 +1,11 @@
-function ResultCard({ status, confidence }) {
+import "../styles/ResultCard.css";
+
+function ResultCard({
+  status,
+  confidence,
+  selectedFile,
+  detectionTime,
+}) {
   const color =
     status === "Real"
       ? "#22C55E"
@@ -6,37 +13,97 @@ function ResultCard({ status, confidence }) {
       ? "#EF4444"
       : "#F59E0B";
 
+  const downloadReport = () => {
+    const report = `
+AcousticSpace Detection Report
+
+---------------------------------
+
+File Name : ${selectedFile ? selectedFile.name : "No File"}
+
+Status : ${status}
+
+Confidence : ${confidence}%
+
+Generated : ${new Date().toLocaleString()}
+
+---------------------------------
+
+This report is generated for demo purposes.
+`;
+
+    const blob = new Blob([report], {
+      type: "text/plain",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Detection_Report.txt";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div
-      style={{
-        background: "#fff",
-        padding: "25px",
-        borderRadius: "15px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-      }}
-    >
-      <h2 style={{ color: "#2563EB" }}>
+    <div className="result-card">
+
+      <h2 className="result-title">
         🎯 Detection Result
       </h2>
-
-      <p style={{ fontSize: "20px" }}>
-        <strong>Status:</strong>{" "}
-        <span style={{ color }}>{status}</span>
+      <p className="result-description">
+       AI model prediction based on uploaded audio.
       </p>
 
-      <p style={{ fontSize: "18px" }}>
-        <strong>Confidence:</strong> {confidence}%
+      <div
+        className="status-badge"
+        style={{ backgroundColor: color }}
+      >
+        {status}
+      </div>
+
+      <div
+        className="confidence-circle"
+        style={{
+          borderColor: color,
+          color: color,
+        }}
+      >
+        {status === "Not Tested" ? "-" : `${confidence}%`}
+      </div>
+
+      <p className="confidence-title">
+        Confidence Score
       </p>
 
       <progress
+        className="confidence-progress"
         value={confidence}
         max="100"
-        style={{
-          width: "100%",
-          height: "18px",
-          marginTop: "15px",
-        }}
       />
+
+      <p className="detection-time">
+        <strong>Detection Time:</strong>{" "}
+        {detectionTime}
+      </p>
+
+      <p className="analysis-message">
+        {status === "Not Tested"
+          ? "Upload an audio file to start detection."
+          : "AI analysis completed successfully."}
+      </p>
+
+      <button
+        onClick={downloadReport}
+        disabled={
+          !selectedFile || status === "Not Tested"
+        }
+        className="download-btn"
+      >
+        📄 Download Report
+      </button>
+
     </div>
   );
 }

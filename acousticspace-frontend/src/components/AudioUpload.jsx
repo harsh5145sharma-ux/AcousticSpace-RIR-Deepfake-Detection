@@ -1,7 +1,12 @@
 import { useRef } from "react";
+import "../styles/AudioUpload.css";
 
-function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
-
+function AudioUpload({
+  selectedFile,
+  setSelectedFile,
+  onUpload,
+  setDuration,
+}) {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -9,6 +14,21 @@ function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
 
     if (file) {
       setSelectedFile(file);
+
+      const audio = new Audio(URL.createObjectURL(file));
+
+      audio.onloadedmetadata = () => {
+        const minutes = Math.floor(audio.duration / 60);
+        const seconds = Math.floor(audio.duration % 60);
+
+        if (setDuration) {
+          setDuration(
+            `${minutes}:${seconds.toString().padStart(2, "0")}`
+          );
+        }
+
+        URL.revokeObjectURL(audio.src);
+      };
     }
   };
 
@@ -18,39 +38,25 @@ function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
       return;
     }
 
-    alert(`${selectedFile.name} uploaded successfully!`);
+  
 
     if (onUpload) {
       onUpload();
     }
-
-    
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#ffffff",
-        padding: "20px",
-        borderRadius: "15px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-      }}
-    >
-      <h2 style={{ color: "#2563EB" }}>Upload Audio</h2>
+    <div className="upload-card">
+      <h2 className="upload-title">🎵 Upload Audio</h2>
 
-      <p>Select a WAV or MP3 file for AI analysis.</p>
+      <p className="upload-subtitle">
+        Upload an audio recording to detect whether it is
+        Real or AI Generated.
+      </p>
 
       <label
         htmlFor="audioFile"
-        style={{
-          backgroundColor: "#2563EB",
-          color: "white",
-          padding: "12px 20px",
-          borderRadius: "8px",
-          cursor: "pointer",
-          display: "inline-block",
-          marginBottom: "15px",
-        }}
+        className="choose-file-btn"
       >
         📁 Choose Audio File
       </label>
@@ -61,7 +67,7 @@ function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
         type="file"
         accept=".wav,.mp3"
         onChange={handleFileChange}
-        style={{ display: "none" }}
+        className="hidden-input"
       />
 
       <br />
@@ -70,33 +76,46 @@ function AudioUpload({ selectedFile, setSelectedFile, onUpload }) {
       <button
         onClick={handleUpload}
         disabled={!selectedFile}
-        style={{
-          backgroundColor: "#2563EB",
-          color: "white",
-          border: "none",
-          padding: "14px 28px",
-          borderRadius: "10px",
-          cursor: selectedFile ? "pointer" : "not-allowed",
-          fontSize: "16px",
-          opacity: selectedFile ? 1 : 0.6,
-        }}
+        className="upload-btn"
       >
-        Upload Audio
+        🚀 Upload Audio
       </button>
 
       {selectedFile && (
-        <div style={{ marginTop: "25px" }}>
+        <div className="selected-file-card">
           <h3>Selected File</h3>
 
-          <p><b>Name:</b> {selectedFile.name}</p>
+          <p>
+            <b>Name:</b> {selectedFile.name}
+          </p>
 
           <p>
-            <b>Size:</b> {(selectedFile.size / 1024).toFixed(2)} KB
+            <b>Size:</b>{" "}
+            {(selectedFile.size / 1024).toFixed(2)} KB
           </p>
 
           <p>
             <b>Type:</b> {selectedFile.type}
           </p>
+
+          <hr />
+
+          <p>
+            <b>Supported:</b> WAV, MP3
+          </p>
+
+          <p>
+            <b>Maximum Size:</b> 20 MB
+          </p>
+
+          <p>
+            <b>AI Model:</b> CNN + BiLSTM
+          </p>
+
+          <p>
+            <b>Status:</b> Ready for Analysis
+          </p>
+          
         </div>
       )}
     </div>

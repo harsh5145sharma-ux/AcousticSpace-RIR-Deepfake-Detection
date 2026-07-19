@@ -1,0 +1,64 @@
+.waveform-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.waveform-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.waveform-title {
+  color: #2563EB;
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.audio-player {
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+
+.segment-box {
+  margin-top: 20px;
+  background: #F8FAFC;
+  padding: 15px;
+  border-radius: 10px;
+  border-left: 5px solid #EF4444;
+}
+
+.segment-title {
+  color: #2563EB;
+  margin-bottom: 12px;
+}
+
+.segment-item {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #374151;
+}
+
+.no-audio {
+  text-align: center;
+  color: #6B7280;
+  padding: 20px;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+
+  .waveform-card {
+    padding: 15px;
+  }
+
+  .waveform-title {
+    font-size: 24px;
+  }
+
+}
