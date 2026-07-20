@@ -22,3 +22,15 @@ uploads/
 
 # OS
 .DS_Store
+# Logs
+*.log
+
+# Python cache
+__pycache__/
+.pytest_cache/
+
+# Environment
+.env.*
+
+# Mac
+.AppleDouble
