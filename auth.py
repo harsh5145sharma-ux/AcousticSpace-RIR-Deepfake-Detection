@@ -3,6 +3,7 @@ Authentication utilities — password hashing aur JWT token handling.
 """
 
 import os
+import re
 import bcrypt
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
@@ -25,8 +26,30 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 # compatibility bug hai ("module bcrypt has no attribute __about__").
 
 
+def validate_password(password: str):
+    """
+    Validate password strength.
+    """
+    if len(password) < 8:
+        raise ValueError("Password must be at least 8 characters long.")
+
+    if not re.search(r"[A-Z]", password):
+        raise ValueError("Password must contain at least one uppercase letter.")
+
+    if not re.search(r"[a-z]", password):
+        raise ValueError("Password must contain at least one lowercase letter.")
+
+    if not re.search(r"\d", password):
+        raise ValueError("Password must contain at least one number.")
+
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        raise ValueError("Password must contain at least one special character.")
+
+
 def hash_password(password: str) -> str:
-    password_bytes = password.encode("utf-8")[:72]  # bcrypt ki 72-byte limit
+    validate_password(password)
+
+    password_bytes = password.encode("utf-8")[:72]
     hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
     return hashed.decode("utf-8")
 
