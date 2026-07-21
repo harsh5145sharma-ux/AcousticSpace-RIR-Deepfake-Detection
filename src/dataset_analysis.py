@@ -5,8 +5,13 @@ import pandas as pd
 import json
 import os
 
-# Set dummy audio paths for demo
-AUDIO_DIR = "/workspace/inputs"
+# Repo-relative base paths (no more hardcoded /workspace/... paths).
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(SRC_DIR)
+
+DEFAULT_METADATA_PATH = os.path.join(ROOT_DIR, "metadata.csv")
+DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "output")
+
 
 def plot_spectrogram(audio_path, output_path):
     y, sr = librosa.load(audio_path, sr=None)
@@ -30,10 +35,11 @@ def analyze_dataset(metadata_path):
     return report
 
 if __name__ == "__main__":
-    metadata_path = "/workspace/inputs/metadata-4543.csv"
-    report = analyze_dataset(metadata_path)
-    
-    with open("/workspace/member1_work/dataset_analysis_report.json", 'w') as f:
+    os.makedirs(DEFAULT_OUTPUT_DIR, exist_ok=True)
+    report = analyze_dataset(DEFAULT_METADATA_PATH)
+
+    report_path = os.path.join(DEFAULT_OUTPUT_DIR, "dataset_analysis_report.json")
+    with open(report_path, "w") as f:
         json.dump(report, f, indent=4)
-        
-    print("Analysis complete. Report generated.")
+
+    print(f"Analysis complete. Report generated at {report_path}")
