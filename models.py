@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from database import Base
 
-
+# User table stores authentication and account information.
 class User(Base):
     __tablename__ = "users"
 
@@ -20,7 +20,7 @@ class User(Base):
 
     predictions = relationship("Prediction", back_populates="owner")
 
-
+# Prediction table stores audio prediction history for each user.
 class Prediction(Base):
     __tablename__ = "predictions"
 
