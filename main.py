@@ -1,34 +1,23 @@
-import logging
 import os
 import numpy as np
-from src.utils import audio_to_spectrogram
 from src.data_loader import get_audio_paths
-from models.inference import predict
+from src.utils import audio_to_spectrogram
+from config import DATA_DIR, PROCESSED_DIR, METADATA_FILE
 
-# Configure logging to track progress for the team
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-
-def run_batch_processing(csv_file):
-    paths = get_audio_paths(csv_file)
-    logging.info(f"Starting batch for {len(paths)} files.")
+def run_pipeline():
+    os.makedirs(PROCESSED_DIR, exist_ok=True)
+    paths = get_audio_paths(METADATA_FILE)
+    print(f"Starting batch processing for {len(paths)} audio files...")
     
-    # Ensure processed directory exists
-    if not os.path.exists("processed"):
-        os.makedirs("processed")
-    
-    for path in paths:
-        try:
-            spec = audio_to_spectrogram(path)
-            file_name = os.path.basename(path).replace(".wav", ".npy")
-            save_path = os.path.join("processed", file_name)
-            np.save(save_path, spec)
-        
-            result = predict(spec)
-            
-            logging.info(f"Saved {file_name}. Processed: {result}")
-
-        except Exception as e:
-            logging.error(f"Failed to process {path}: {e}")
+    for audio_path in paths:
+        if os.path.exists(audio_path):
+            spec = audio_to_spectrogram(audio_path)
+            base_name = os.path.splitext(os.path.basename(audio_path))[0]
+            output_path = os.path.join(PROCESSED_DIR, f"{base_name}.npy")
+            np.save(output_path, spec)
+            print(f"Processed and saved: {output_path}")
+        else:
+            print(f"Warning: File not found -> {audio_path}")
 
 if __name__ == "__main__":
-    run_batch_processing("metadata.csv")
+    run_pipeline()
