@@ -21,8 +21,15 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="AcousticSpace API",
-    description="Deepfake Detection via Room Impulse Response (RIR) — Backend API",
+    description="Backend API for Deepfake Detection using Room Impulse Response (RIR).",
     version="1.0.0",
+    contact={
+        "name": "AcousticSpace Backend Team",
+        "email": "backend@acousticspace.local"
+    },
+    license_info={
+        "name": "MIT License"
+    }
 )
 
 # CORS setup — Member 4 (React frontend) se requests allow karne ke liye
