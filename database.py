@@ -20,7 +20,14 @@ Base = declarative_base()
 
 
 def get_db():
-    """FastAPI dependency — har request ke liye ek DB session deta hai."""
+    """
+    Creates a new database session for every request.
+
+    Yields:
+        Session: Active SQLAlchemy session.
+
+    Automatically closes the session after request completion.
+    """
     db = SessionLocal()
     try:
         yield db
