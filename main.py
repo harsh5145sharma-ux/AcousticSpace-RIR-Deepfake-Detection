@@ -46,11 +46,14 @@ app.include_router(auth_router.router)
 app.include_router(predict.router)
 app.include_router(history.router)
 
-
 @app.get("/health", tags=["Health"])
 def health_check():
-    """Server zinda hai ya nahi check karne ke liye."""
-    return {"status": "ok", "message": "AcousticSpace API is running"}
+    return {
+        "status": "healthy",
+        "service": "AcousticSpace Backend",
+        "version": "1.0.0",
+        "message": "Backend service is running successfully"
+    }
 
 
 @app.get("/", tags=["Health"])
