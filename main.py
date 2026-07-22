@@ -55,7 +55,12 @@ def health_check():
         "message": "Backend service is running successfully"
     }
 
-
 @app.get("/", tags=["Health"])
 def root():
-    return {"message": "Welcome to AcousticSpace API. Visit /docs for API documentation."}
+    return {
+        "project": "AcousticSpace",
+        "version": "1.0.0",
+        "documentation": "/docs",
+        "health_check": "/health",
+        "status": "Backend Running"
+    }
