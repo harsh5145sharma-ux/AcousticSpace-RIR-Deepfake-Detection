@@ -5,11 +5,11 @@ import WaveSurfer from "wavesurfer.js";
 function WaveformViewer({ selectedFile, result }) {
   const waveformRef = useRef(null);
   const waveSurferRef = useRef(null);
-  const [audioUrl, setAudioUrl] = useState("");
+  const [audioUrl, setAudioUrl] = useState(null);
 
   useEffect(() => {
     if (!selectedFile) {
-      setAudioUrl("");
+      setAudioUrl(null);
       return;
     }
 
@@ -48,30 +48,15 @@ function WaveformViewer({ selectedFile, result }) {
         <>
           <div ref={waveformRef}></div>
 
-          <audio
-            controls
-            src={audioUrl}
-            className="audio-player"
-          />
+          {audioUrl && (
+           <audio
+              controls
+              src={audioUrl}
+              className="audio-player"
+            />
+)}
 
-          {result?.flagged_segments?.length > 0 && (
-            <div className="segment-box">
-
-              <h3 className="segment-title">
-                Suspicious Segments
-              </h3>
-
-              {result.flagged_segments.map((segment, index) => (
-                <p
-                  key={index}
-                  className="segment-item"
-                >
-                  🔴 {segment[0]} sec - {segment[1]} sec
-                </p>
-              ))}
-
-            </div>
-          )}
+          
         </>
       ) : (
         <p className="no-audio">

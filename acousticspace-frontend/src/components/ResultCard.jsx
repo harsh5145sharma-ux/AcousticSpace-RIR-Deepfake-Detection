@@ -87,6 +87,10 @@ This report is generated for demo purposes.
         <strong>Detection Time:</strong>{" "}
         {detectionTime}
       </p>
+      <p>
+        <strong>Filename:</strong>{" "}
+        {selectedFile ? selectedFile.name : "-"}
+      </p>
 
       <p className="analysis-message">
         {status === "Not Tested"

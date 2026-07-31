@@ -6,6 +6,7 @@ function AudioUpload({
   setSelectedFile,
   onUpload,
   setDuration,
+  isProcessing,
 }) {
   const fileInputRef = useRef(null);
 
@@ -75,10 +76,10 @@ function AudioUpload({
 
       <button
         onClick={handleUpload}
-        disabled={!selectedFile}
+        disabled={!selectedFile || isProcessing}
         className="upload-btn"
       >
-        🚀 Upload Audio
+        {isProcessing ? "⏳ Uploading..." : "🚀 Upload Audio"}
       </button>
 
       {selectedFile && (
@@ -113,7 +114,8 @@ function AudioUpload({
           </p>
 
           <p>
-            <b>Status:</b> Ready for Analysis
+            <b>Status:</b>{" "}
+            {isProcessing ? "Analyzing Audio..." : "Ready for Analysis"}
           </p>
           
         </div>

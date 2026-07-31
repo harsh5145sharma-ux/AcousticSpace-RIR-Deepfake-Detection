@@ -3,10 +3,12 @@ import Navbar from "../components/Navbar";
 import AudioUpload from "../components/AudioUpload";
 import ResultCard from "../components/ResultCard";
 import WaveformViewer from "../components/WaveformViewer";
-import mockResult from "../data/mockResult";
+import API from "../api/api";
 import "../styles/Dashboard.css";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
   const [status, setStatus] = useState("Not Tested");
   const [confidence, setConfidence] = useState(0);
@@ -17,22 +19,55 @@ function Dashboard() {
   const [message, setMessage] = useState("");
   
 
-  const handleDetection = () => {
-    setStatus("Processing...");
-    setConfidence(0);
-    setResult(null);
-    setIsProcessing(true);
-    setMessage("Audio uploaded successfully!");
+  const handleDetection = async () => {
+  if (!selectedFile) {
+    alert("Please select an audio file first!");
+    return;
+  }
+  const token = localStorage.getItem("token");
 
+  if (!token) {
+    alert("Please login first!");
+    return;
+  }
+
+  setStatus("Processing...");
+  setConfidence(0);
+  setResult(null);
+  setIsProcessing(true);
+  setMessage("");
+
+  try {
+    const formData = new FormData();
+formData.append("file", selectedFile);
+
+const response = await API.post("/predict/", formData, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "multipart/form-data",
+  },
+});
+
+const data = response.data;
+
+    setResult(data);
+    setStatus(
+      data.prediction.toLowerCase() === "fake" ? "Fake" : "Real"
+    );
+    setConfidence(data.confidence * 100);
+    setDetectionTime(new Date().toLocaleString());
+    setMessage("Audio analyzed successfully. Prediction saved to history.");
     setTimeout(() => {
-      setResult(mockResult);
-      setStatus(mockResult.is_fake ? "Fake" : "Real");
-      setConfidence(mockResult.confidence);
-      setDetectionTime(new Date().toLocaleString());
-      setIsProcessing(false);
-      setMessage("Detection Completed Successfully!");
-    }, 2000);
-  };
+       setMessage("");
+    }, 3000);
+  } catch (error) {
+    console.error(error);
+    setStatus("Error");
+    setMessage("Unable to connect to server. Please check backend and try again.");
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   return (
     <>
@@ -85,8 +120,8 @@ function Dashboard() {
 
               <p>
                 {status === "Not Tested"
-                  ? "-"
-                  : `${confidence}%`}
+                   ? "-"
+                   : `${confidence.toFixed(0)}%`}
               </p>
             </div>
 
@@ -105,6 +140,7 @@ function Dashboard() {
                 setSelectedFile={setSelectedFile}
                 setDuration={setDuration}
                 onUpload={handleDetection}
+                isProcessing={isProcessing}
               />
 
               <div className="audio-info">
@@ -156,15 +192,13 @@ function Dashboard() {
                 <div className="processing-box">
 
                   <h3 className="processing-title">
-                    Processing Audio...
+                    ⏳ Analyzing Audio...
                   </h3>
 
-                  <h3 className="processing-title">
-                    ⏳ Processing Audio...
-                 </h3>
+                  <p>Please wait while AI analyzes your audio.</p>
 
                   <progress
-                    className="processing-progress"
+                      className="processing-progress"
                   />
 
                 </div>
@@ -181,6 +215,22 @@ function Dashboard() {
             </div>
 
           </div>
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+           <button
+             onClick={() => navigate("/history")}
+             style={{
+               padding: "10px 20px",
+               borderRadius: "8px",
+               border: "none",
+               cursor: "pointer",
+               background: "#2563EB",
+               color: "white",
+               fontWeight: "bold",
+            }}
+          >
+           📜 View Prediction History
+          </button>
+        </div>
 
           {/* Footer */}
 
@@ -196,6 +246,10 @@ function Dashboard() {
 
            <p>
              Frontend Module • Member 4
+           </p>
+
+           <p>
+             Version 1.0
            </p>
 
            <p>
