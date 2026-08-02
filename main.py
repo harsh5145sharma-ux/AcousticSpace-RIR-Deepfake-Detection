@@ -32,3 +32,4 @@ def run_batch_processing(csv_file):
 
 if __name__ == "__main__":
     run_batch_processing("metadata.csv")
+    # Updated documentation / checkpoint for acoustic model pipeline
