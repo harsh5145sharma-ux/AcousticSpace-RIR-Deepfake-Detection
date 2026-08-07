@@ -34,3 +34,16 @@ __pycache__/
 
 # Mac
 .AppleDouble
+# Local test files
+tests/
+uploads/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Duplicate/local ML artifacts
+ml_models/
