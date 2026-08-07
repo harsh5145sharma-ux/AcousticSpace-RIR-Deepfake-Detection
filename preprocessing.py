@@ -229,7 +229,135 @@ def extract_features(y: np.ndarray, file_id: str, label: str, sr: int = SAMPLE_R
         duration_sec=float(len(y) / sr),
         mfcc=np.mean(mfcc, axis=1),
     )
+# --------------------------------------------------------------------------- #
+# Single-audio inference preprocessing
+# --------------------------------------------------------------------------- #
 
+def preprocess_audio(file_path: str) -> np.ndarray:
+    """
+    Preprocess a single uploaded audio file for backend/model inference.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to an audio file (.wav, .flac, .mp3).
+
+    Returns
+    -------
+    np.ndarray
+        Feature vector with:
+        shape = (22,)
+        dtype = float32
+
+    Processing:
+        1. Load audio
+        2. Convert to mono
+        3. Resample to SAMPLE_RATE (16 kHz)
+        4. Trim silence
+        5. Peak normalize
+        6. Extract RIR/acoustic features
+        7. Extract spectral features
+        8. Extract MFCC features
+    """
+
+    # ---------------------------
+    # Validate input path
+    # ---------------------------
+
+    if not isinstance(file_path, (str, os.PathLike)):
+        raise TypeError(
+            "file_path must be a string or path-like object"
+        )
+
+    file_path = str(file_path)
+
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(
+            f"Audio file not found: {file_path}"
+        )
+
+    # ---------------------------
+    # Validate audio extension
+    # ---------------------------
+
+    extension = Path(file_path).suffix.lower()
+
+    supported_extensions = {
+        ".wav",
+        ".flac",
+        ".mp3",
+    }
+
+    if extension not in supported_extensions:
+        raise ValueError(
+            f"Unsupported audio format: {extension}. "
+            "Supported formats: WAV, FLAC, MP3"
+        )
+
+    # ---------------------------
+    # Existing Member 1 pipeline
+    # ---------------------------
+
+    y = load_audio(
+        file_path,
+        sr=SAMPLE_RATE,
+    )
+
+    if y is None:
+        raise ValueError(
+            "Audio preprocessing failed. "
+            "The audio may be corrupt, silent, unreadable "
+            "or shorter than the minimum duration."
+        )
+
+    # ---------------------------
+    # Existing feature extraction
+    # ---------------------------
+
+    features = extract_features(
+        y=y,
+        file_id=Path(file_path).stem,
+        label="unknown",
+        sr=SAMPLE_RATE,
+    )
+
+    # ---------------------------
+    # Convert features to fixed
+    # model-ready NumPy vector
+    # ---------------------------
+
+    feature_vector = np.array(
+        [
+            features.rt60,
+            features.edt,
+            features.c50,
+            features.spectral_centroid_mean,
+            features.spectral_bandwidth_mean,
+            features.spectral_rolloff_mean,
+            features.zcr_mean,
+            features.rms_mean,
+            features.duration_sec,
+            *features.mfcc.tolist(),
+        ],
+        dtype=np.float32,
+    )
+
+    # ---------------------------
+    # Validate output
+    # ---------------------------
+
+    if feature_vector.shape != (22,):
+        raise RuntimeError(
+            "Unexpected preprocessing output shape. "
+            f"Expected (22,), got {feature_vector.shape}"
+        )
+
+    if not np.all(np.isfinite(feature_vector)):
+        raise ValueError(
+            "Preprocessing generated NaN or infinite values"
+        )
+
+    return feature_vector
 
 # --------------------------------------------------------------------------- #
 # Batch pipeline
