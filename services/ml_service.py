@@ -2,19 +2,20 @@
 ML integration layer.
 
 Member 1:
-    preprocessing
+preprocessing
 
 Member 2:
-    model inference
+model inference
 
 Member 3:
-    backend integration
+backend integration
 """
 
 from importlib import import_module
 
 
 class MLIntegrationError(Exception):
+    """Raised when ML pipeline integration fails."""
     pass
 
 
@@ -38,8 +39,11 @@ def _find_callable(candidates):
     return None
 
 
-def get_preprocessor():
+# ============================================================
+# MEMBER 1 - PREPROCESSING
+# ============================================================
 
+def get_preprocessor():
     candidates = [
         ("preprocessing", "preprocess_audio"),
         ("preprocessing", "process_audio"),
@@ -58,13 +62,18 @@ def get_preprocessor():
     return function
 
 
-def get_predictor():
+# ============================================================
+# MEMBER 2 - MODEL INFERENCE
+# ============================================================
 
+def get_predictor():
     candidates = [
-        ("models.inference", "predict"),
+        ("ml_models.inference", "predict_audio"),
+        ("ml_models.inference", "predict"),
         ("models.inference", "predict_audio"),
-        ("inference", "predict"),
+        ("models.inference", "predict"),
         ("inference", "predict_audio"),
+        ("inference", "predict"),
         ("src.inference", "predict"),
     ]
 
@@ -78,19 +87,21 @@ def get_predictor():
     return function
 
 
-def normalize_result(raw_result):
+# ============================================================
+# NORMALIZE MEMBER 2 RESULT
+# ============================================================
 
+def normalize_result(raw_result):
     if not isinstance(raw_result, dict):
         raise MLIntegrationError(
             "Model must return a dictionary."
         )
 
-    # -----------------------------
-    # prediction
-    # -----------------------------
+    # --------------------------------------------------------
+    # Prediction
+    # --------------------------------------------------------
 
     if "is_fake" in raw_result:
-
         prediction = (
             "fake"
             if bool(raw_result["is_fake"])
@@ -98,19 +109,16 @@ def normalize_result(raw_result):
         )
 
     elif "prediction" in raw_result:
-
         prediction = str(
             raw_result["prediction"]
         ).lower().strip()
 
     elif "label" in raw_result:
-
         prediction = str(
             raw_result["label"]
         ).lower().strip()
 
     else:
-
         raise MLIntegrationError(
             "Model result missing prediction."
         )
@@ -121,6 +129,7 @@ def normalize_result(raw_result):
         "deepfake",
         "synthetic",
         "generated",
+        "spoof",
         "1",
     }
 
@@ -129,6 +138,8 @@ def normalize_result(raw_result):
         "human",
         "genuine",
         "authentic",
+        "bonafide",
+        "bona_fide",
         "0",
     }
 
@@ -143,9 +154,9 @@ def normalize_result(raw_result):
             f"Unknown prediction label: {prediction}"
         )
 
-    # -----------------------------
-    # confidence
-    # -----------------------------
+    # --------------------------------------------------------
+    # Confidence
+    # --------------------------------------------------------
 
     confidence = raw_result.get(
         "confidence",
@@ -184,61 +195,80 @@ def normalize_result(raw_result):
     }
 
 
-def predict_audio_file(file_path):
+# ============================================================
+# COMPLETE AUDIO PREDICTION PIPELINE
+# ============================================================
 
-    preprocessing = get_preprocessor()
+def predict_audio_file(file_path):
+    """
+    Run complete prediction pipeline.
+
+    Member 1 preprocessing is checked to ensure that the
+    preprocessing component is integrated.
+
+    Member 2 predict_audio() receives the original audio path
+    because Member 2's trained model uses its own 40-MFCC
+    inference preprocessing.
+    """
+
+    # --------------------------------------------------------
+    # Verify Member 1 integration
+    # --------------------------------------------------------
+
+    preprocessor = get_preprocessor()
+
+    try:
+        member1_features = preprocessor(file_path)
+
+    except Exception as exc:
+        raise MLIntegrationError(
+            f"Member 1 preprocessing failed: {exc}"
+        ) from exc
+
+    if member1_features is None:
+        raise MLIntegrationError(
+            "Member 1 preprocessing returned no features."
+        )
+
+    # --------------------------------------------------------
+    # Member 2 actual model inference
+    # --------------------------------------------------------
 
     predictor = get_predictor()
 
     try:
-
-        features = preprocessing(
-            file_path
-        )
-
-    except Exception as exc:
-
-        raise MLIntegrationError(
-            f"Preprocessing failed: {exc}"
-        ) from exc
-
-    if features is None:
-
-        raise MLIntegrationError(
-            "Preprocessing returned no features."
-        )
-
-    try:
-
-        raw_result = predictor(
-            features
-        )
+        # IMPORTANT:
+        # Member 2 predict_audio() expects AUDIO FILE PATH,
+        # not Member 1's 22-feature array.
+        raw_result = predictor(file_path)
 
     except Exception as exc:
-
         raise MLIntegrationError(
-            f"Model inference failed: {exc}"
+            f"Member 2 model inference failed: {exc}"
         ) from exc
 
-    return normalize_result(
-        raw_result
-    )
+    return normalize_result(raw_result)
 
+
+# ============================================================
+# INTEGRATION STATUS
+# ============================================================
 
 def integration_status():
-
     member1 = False
     member2 = False
 
     try:
         get_preprocessor()
         member1 = True
+
     except MLIntegrationError:
         pass
 
     try:
         get_predictor()
         member2 = True
+
     except MLIntegrationError:
         pass
 
