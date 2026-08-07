@@ -23,9 +23,10 @@ File Name : ${selectedFile ? selectedFile.name : "No File"}
 
 Status : ${status}
 
-Confidence : ${confidence}%
+Confidence : ${confidence.toFixed(0)}%
 
-Generated : ${new Date().toLocaleString()}
+Generated :
+${detectionTime}
 
 ---------------------------------
 
