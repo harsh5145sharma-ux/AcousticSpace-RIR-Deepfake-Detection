@@ -1,112 +1,185 @@
-"""
-Prediction route — audio file leke real/fake prediction deta hai.
-
-IMPORTANT: Abhi 'mock_predict()' use ho raha hai kyunki Member 2 ka
-trained model (model.pt) abhi ready nahi hai. Jaise hi model mil jaye,
-neeche diye MOCK ko REAL FUNCTION se replace karna hai — instructions
-niche comment mein hain.
-"""
-
-import random
-import shutil
 import os
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+import shutil
+import uuid
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+)
+
 from sqlalchemy.orm import Session
 
 from database import get_db
-import models
-import schemas
 from auth import get_current_user
 
-router = APIRouter(prefix="/predict", tags=["Prediction"])
+import models
 
-ALLOWED_EXTENSIONS = {".wav", ".flac", ".mp3"}
-MAX_FILE_SIZE_MB = 20
+from services.ml_service import (
+    MLIntegrationError,
+    predict_audio_file,
+)
+
+
+router = APIRouter(
+    prefix="/predict",
+    tags=["Prediction"],
+)
+
+
 UPLOAD_DIR = "uploads"
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+MAX_FILE_SIZE = 20 * 1024 * 1024
+
+ALLOWED_EXTENSIONS = {
+    ".wav",
+    ".mp3",
+    ".flac",
+}
 
 
-# ============================================================
-# MOCK PREDICTION — TEMPORARY, Member 2 ka model aane tak
-# ============================================================
-def mock_predict(file_path: str) -> dict:
-    """
-    Dummy prediction function. Real/fake randomly return karta hai
-    taaki API ka structure test ho sake bina real model ke.
-
-    Member 2 ka model.pt ready hone par isko is se replace karo:
-
-    import torch
-    from preprocessing import extract_features  # Member 1 ka pipeline
-
-    def real_predict(file_path: str) -> dict:
-        model = torch.load("model.pt")
-        model.eval()
-        features = extract_features(file_path)
-        with torch.no_grad():
-            output = model(features)
-        prediction = "fake" if output.item() > 0.5 else "real"
-        confidence = float(output.item())
-        return {"prediction": prediction, "confidence": confidence}
-    """
-    prediction = random.choice(["real", "fake"])
-    confidence = round(random.uniform(0.70, 0.99), 2)
-    return {"prediction": prediction, "confidence": confidence}
+os.makedirs(
+    UPLOAD_DIR,
+    exist_ok=True,
+)
 
 
-# ============================================================
-
-
-def validate_file(file: UploadFile):
-    ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unsupported file type '{ext}'. Allowed: {ALLOWED_EXTENSIONS}",
-        )
-
-
-@router.post("/", response_model=schemas.PredictionResponse)
+@router.post("/")
 def predict_audio(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(
+        get_current_user
+    ),
 ):
-    validate_file(file)
 
-    # File temporarily save karo
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # ---------------------------------
+    # Validate filename
+    # ---------------------------------
 
-    file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
-    if file_size_mb > MAX_FILE_SIZE_MB:
-        os.remove(file_path)
+    if not file.filename:
+
         raise HTTPException(
             status_code=400,
-            detail=f"File too large ({file_size_mb:.1f}MB). Max allowed: {MAX_FILE_SIZE_MB}MB",
+            detail="Audio filename is required.",
         )
 
-    # ---- Yahan mock_predict() ko real_predict() se replace karna hoga ----
-    result = mock_predict(file_path)
+    extension = os.path.splitext(
+        file.filename
+    )[1].lower()
 
-    # DB mein prediction save karo (history ke liye)
-    db_prediction = models.Prediction(
-        filename=file.filename,
-        result=result["prediction"],
-        confidence=result["confidence"],
-        owner_id=current_user.id,
+    # ---------------------------------
+    # Validate extension
+    # ---------------------------------
+
+    if extension not in ALLOWED_EXTENSIONS:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Unsupported audio format. "
+                "Allowed formats: WAV, MP3, FLAC."
+            ),
+        )
+
+    # ---------------------------------
+    # Unique temporary filename
+    # ---------------------------------
+
+    temporary_name = (
+        f"{uuid.uuid4().hex}{extension}"
     )
-    db.add(db_prediction)
-    db.commit()
-    db.refresh(db_prediction)
 
-    # Temp file cleanup
-    os.remove(file_path)
-
-    return schemas.PredictionResponse(
-        prediction=result["prediction"],
-        confidence=result["confidence"],
-        filename=file.filename,
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        temporary_name,
     )
+
+    try:
+
+        # ---------------------------------
+        # Save uploaded audio
+        # ---------------------------------
+
+        with open(
+            file_path,
+            "wb",
+        ) as buffer:
+
+            shutil.copyfileobj(
+                file.file,
+                buffer,
+            )
+
+        # ---------------------------------
+        # Validate size
+        # ---------------------------------
+
+        if os.path.getsize(file_path) > MAX_FILE_SIZE:
+
+            raise HTTPException(
+                status_code=413,
+                detail="Maximum audio size is 20 MB.",
+            )
+
+        # ---------------------------------
+        # Member 1 -> Member 2
+        # ---------------------------------
+
+        try:
+
+            result = predict_audio_file(
+                file_path
+            )
+
+        except MLIntegrationError as exc:
+
+            raise HTTPException(
+                status_code=503,
+                detail=str(exc),
+            )
+
+        # ---------------------------------
+        # Store history
+        # ---------------------------------
+
+        record = models.Prediction(
+            filename=file.filename,
+            result=result["prediction"],
+            confidence=result["confidence"],
+            owner_id=current_user.id,
+        )
+
+        db.add(record)
+
+        db.commit()
+
+        db.refresh(record)
+
+        # ---------------------------------
+        # Response for Member 4
+        # ---------------------------------
+
+        return {
+            "id": record.id,
+            "filename": file.filename,
+            "prediction": result["prediction"],
+            "confidence": result["confidence"],
+            "flagged_segments": result.get(
+                "flagged_segments",
+                [],
+            ),
+            "created_at": record.created_at,
+        }
+
+    finally:
+
+        try:
+            file.file.close()
+        except Exception:
+            pass
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
